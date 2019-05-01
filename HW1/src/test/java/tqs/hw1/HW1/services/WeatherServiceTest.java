@@ -3,8 +3,10 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package tqs.hw1.HW1;
+package tqs.hw1.HW1.services;
 
+import tqs.hw1.HW1.services.DarkSkyService;
+import tqs.hw1.HW1.services.WeatherService;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;

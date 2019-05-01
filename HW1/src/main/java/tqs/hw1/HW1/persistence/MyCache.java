@@ -1,4 +1,4 @@
-package tqs.hw1.HW1;
+package tqs.hw1.HW1.persistence;
 
 import java.util.ArrayList;
 import java.util.HashMap;
