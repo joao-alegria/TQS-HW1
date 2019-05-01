@@ -1,0 +1,266 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <link rel="stylesheet" href="https://cdn.rawgit.com/openlayers/openlayers.github.io/master/en/v5.3.0/css/ol.css" type="text/css">
+        <style>
+            .map {
+                margin-left: auto;
+                margin-right: auto;
+                height: 450px;
+                width: 80%;
+            }
+
+            /* Style the tab */
+            .tab {
+                overflow: hidden;
+                border: 1px solid #ccc;
+                background-color: #f1f1f1;
+            }
+
+            /* Style the buttons inside the tab */
+            .tab button {
+                background-color: inherit;
+                float: left;
+                border: none;
+                outline: none;
+                cursor: pointer;
+                width: 50%;
+                padding: 14px 16px;
+                transition: 0.3s;
+                font-size: 17px;
+            }
+
+            /* Change background color of buttons on hover */
+            .tab button:hover {
+                background-color: #ddd;
+            }
+
+            /* Create an active/current tablink class */
+            .tab button.active {
+                background-color: #ccc;
+            }
+
+            /* Style the tab content */
+            .tabcontent {
+                display: none;
+                padding: 6px 12px;
+                border-top: none;
+            }
+        </style>
+        <title>HW1</title>
+
+        <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    </head>
+    <body>
+        <div class="container-fluid">
+            <h2 align="center" style="margin:15px">TQS Homework1 - Weather Prediction</h2>
+            <h4 align="center">Select the location to predict and the time duration</h4>
+            <div style="margin-left:40%; margin-bottom: 35px;">
+                <ul class="nav navbar-nav">
+                    <li class="radio">
+                        <label>
+                            <input class="form-check-input" type="radio" id="currentTime" value="current" onclick="radioChange(this)" checked>Current Weather
+                        </label>
+                    </li>
+                    <li>
+                        <label>
+                            <input class="form-check-input" type="radio" id="multipleDaysTime" value="multipleDays" onclick="radioChange(this)">Multiple Day Prediction
+                        </label>
+                    </li>
+                </ul>
+                <div class="form-group" style="display: none; width: 270px; font-size: 17px;" id="numberDays">
+                    <input type="text" class="form-control" id="numDays" placeholder="Number of days to predict(7 max.)">
+                </div>
+            </div>
+
+            <ul style="margin-bottom:15px;" class="nav nav-tabs" id="myTab" role="tablist">
+                <li class="nav-item" style="width: 50%">
+                    <a class="nav-link active" id="form-tab" value="form" data-toggle="tab" href="#myForm" role="tab" aria-controls="myForm" aria-selected="true">Insert in form</a>
+                </li>
+                <li class="nav-item" style="width: 50%">
+                    <a class="nav-link" id="map-tab" value="map" data-toggle="tab" href="#myMap" role="tab" aria-controls="myMap" aria-selected="false">Select from map</a>
+                </li>
+            </ul>
+
+            <div class="tab-content" id="myTabContent" style=" margin-bottom: 20px;">
+                <div style="margin: 0 auto;" class="tab-pane fade show active col-md-2" id="myForm" role="tabpanel" aria-labelledby="home-tab">
+                    <center>
+                        <form style="font-size: 20px;">
+                            <div class="form-group">
+                                <label>Latitude:</label>
+                                <input style="text-align: center;" type="text" class="form-control" id="latitude" placeholder="40">
+                            </div>
+                            <div class="form-group">
+                                <label>Longitude:</label>
+                                <input style="text-align: center;" type="text" class="form-control" id="longitude" placeholder="-8">
+                            </div>
+                            <input style="font-size: 18px;" class="btn btn-primary" type="button" value="Submit"onClick="getInfo(document.getElementById('latitude').value, document.getElementById('longitude').value)">
+                        </form>
+                    </center>
+                </div>
+                <div class="tab-pane fade" id="myMap" role="tabpanel" aria-labelledby="profile-tab">
+                    <div id="map" class="map"></div>
+                </div>
+            </div>
+
+            <div id="showInfo" class="tabcontent" style="margin-top: 10px; margin-bottom: 20px;">
+                <button onclick="$('#showInfo').hide()" style="float: right; font-size: 40px;" type="button" class="close" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h2 id="infoTitle"></h2>
+                <table class="table" border="1">
+                    <thead class="thead-dark">
+                        <tr>
+                            <th scope="col">Humidity</th>
+                            <th scope="col">Ozone</th>
+                            <th scope="col">Percip. Prob.</th>
+                            <th scope="col">Pressure</th>
+                            <th scope="col">Visibility</th>
+                            <th scope="col">Wind Speed</th>
+                        </tr>
+                    </thead>
+                    <tbody id="myTable"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <script src="https://cdn.rawgit.com/openlayers/openlayers.github.io/master/en/v5.3.0/build/ol.js"></script>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+        <script type="text/javascript">
+                            var mapLoaded = 0;
+                            $('.nav-tabs a').on('shown.bs.tab', function (event) {
+                                var x = event.target.id;
+                                if (x === "map-tab") {
+                                    loadMap();
+                                }
+                            });
+
+
+                            function changeTab(evt, method) {
+                                var i, tabcontent, tablinks;
+                                tabcontent = document.getElementsByClassName("tabcontent");
+                                for (i = 0; i < tabcontent.length; i++) {
+                                    tabcontent[i].style.display = "none";
+                                    tabcontent[i].className = tabcontent[i].className.replace(" active", "");
+                                }
+                                tablinks = document.getElementsByClassName("tablinks");
+                                for (i = 0; i < tablinks.length; i++) {
+                                    tablinks[i].className = tablinks[i].className.replace(" active", "");
+                                }
+
+                                if (method !== "showInfo") {
+                                    document.getElementById(method).style.display = "block";
+                                    evt.currentTarget.className += " active";
+                                    if (method === "myMap") {
+
+                                    }
+                                } else {
+                                    document.getElementById(method).style.display = "block";
+                                }
+                            }
+
+                            function loadMap() {
+                                if (mapLoaded === 0) {
+                                    mapLoaded = 1;
+                                    var map = new ol.Map({
+                                        target: 'map',
+                                        layers: [new ol.layer.Tile({source: new ol.source.OSM()})],
+                                        view: new ol.View({center: ol.proj.fromLonLat([-8, 40]), zoom: 4})
+                                    });
+                                    map.on('click', function (evt) {
+                                        var coords = ol.proj.transform(evt.coordinate, 'EPSG:3857', 'EPSG:4326');
+                                        getInfo(coords[1], coords[0]);
+                                    });
+                                }
+                            }
+
+                            function radioChange(radioButton) {
+                                console.log(radioButton.value)
+                                if (radioButton.value === "current") {
+                                    $("#currentTime").prop("checked", true);
+                                    $("#multipleDaysTime").prop("checked", false);
+                                    $("#numberDays").hide();
+                                } else {
+                                    $("#currentTime").prop("checked", false);
+                                    $("#multipleDaysTime").prop("checked", true);
+                                    $("#numberDays").show();
+                                }
+                            }
+
+                            function getInfo(latitude, longitude) {
+                                var infoTitle = document.getElementById("infoTitle");
+                                var endOfRequest;
+                                if (document.getElementById("currentTime").checked) {
+                                    endOfRequest = "/now";
+                                    infoTitle.innerText = "Current Weather"
+                                } else {
+                                    if (document.getElementById("numDays").value !== "") {
+                                        endOfRequest = "/" + document.getElementById("numDays").value;
+                                        infoTitle.innerText = "Predictions for " + document.getElementById("numDays").value + " days"
+                                    } else {
+                                        endOfRequest = "";
+                                        infoTitle.innerText = "Predictions for the entire week"
+                                    }
+                                }
+
+                                console.log(endOfRequest)
+                                var requestData;
+                                $.ajax({
+                                    async: false,
+                                    type: 'GET',
+                                    url: 'http://localhost:8080/api/weather/' + latitude + "," + longitude + endOfRequest,
+                                    success: function (data) {
+                                        requestData = data;
+                                    }
+                                });
+
+                                console.log(requestData);
+                                changeTab(null, "showInfo");
+
+                                createTable(requestData)
+                            }
+
+                            function createTable(requestData) {
+                                $('html, body').stop().animate({ scrollTop: $("#showInfo").offset().top }, 500);
+                                var table = document.getElementById("myTable");
+                                while (table.hasChildNodes()) {
+                                    table.removeChild(table.lastChild);
+                                }
+                                var row = table.insertRow(index);
+                                var index = 0;
+                                if ("humidity" in requestData) {
+                                    row = table.insertRow(index);
+                                    var cell1 = row.insertCell(0);
+                                    var cell2 = row.insertCell(1);
+                                    var cell3 = row.insertCell(2);
+                                    var cell4 = row.insertCell(3);
+                                    var cell5 = row.insertCell(4);
+                                    var cell6 = row.insertCell(5);
+                                    cell1.innerHTML = requestData["humidity"];
+                                    cell2.innerHTML = requestData["ozone"];
+                                    cell3.innerHTML = requestData["precipProbability"];
+                                    cell4.innerHTML = requestData["pressure"];
+                                    cell5.innerHTML = requestData["visibility"];
+                                    cell6.innerHTML = requestData["windSpeed"];
+                                } else {
+                                    for (var item in requestData) {
+                                        row = table.insertRow(index);
+                                        cell1 = row.insertCell(0);
+                                        cell2 = row.insertCell(1);
+                                        cell3 = row.insertCell(2);
+                                        cell4 = row.insertCell(3);
+                                        cell5 = row.insertCell(4);
+                                        cell6 = row.insertCell(5);
+                                        cell1.innerHTML = requestData[item]["humidity"];
+                                        cell2.innerHTML = requestData[item]["ozone"];
+                                        cell3.innerHTML = requestData[item]["precipProbability"];
+                                        cell4.innerHTML = requestData[item]["pressure"];
+                                        cell5.innerHTML = requestData[item]["visibility"];
+                                        cell6.innerHTML = requestData[item]["windSpeed"];
+
+                                        index += 1;
+                                    }
+                                }
+                            }
+        </script>
+    </body>
+</html>
