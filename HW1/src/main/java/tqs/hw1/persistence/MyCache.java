@@ -1,4 +1,4 @@
-package tqs.hw1.HW1.persistence;
+package tqs.hw1.persistence;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -38,7 +38,8 @@ public class MyCache<T, K> {
 
     public static class Builder<T,K> {
 
-        private double ttl, updateTime = 5.0 * 60.0 * 1000.0;
+        private double ttl = 5.0 * 60.0 * 1000.0;
+        private double updateTime = 5.0 * 60.0 * 1000.0;
 
         public Builder ttl(double ttl) {
             this.ttl = ttl;
@@ -73,10 +74,6 @@ public class MyCache<T, K> {
         });
         t.setDaemon(true);
         t.start();
-    }
-    
-    private void stopThread(){
-        this.running=false;
     }
     
     private void relaunchThread(){
@@ -123,8 +120,7 @@ public class MyCache<T, K> {
                 throw new CacheException("The value of the key "+key.toString()+" already expired.");
             }
             this.hits+=1;
-            K predictions=value.value;
-            return predictions;
+            return value.value;
         }else{
             this.misses+=1;
             throw new CacheException("The key "+key.toString()+" doesn't exist or expired.");

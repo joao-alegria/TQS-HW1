@@ -5,8 +5,8 @@
  */
 package tqs.hw1.HW1.services;
 
-import tqs.hw1.HW1.services.DarkSkyService;
-import tqs.hw1.HW1.services.WeatherService;
+import tqs.hw1.services.DarkSkyService;
+import tqs.hw1.services.WeatherService;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;

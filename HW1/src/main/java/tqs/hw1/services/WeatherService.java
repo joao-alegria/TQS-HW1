@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package tqs.hw1.HW1.services;
+package tqs.hw1.services;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -13,7 +13,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import tqs.hw1.HW1.persistence.MyCache;
+import tqs.hw1.persistence.MyCache;
 
 /**
  *
@@ -34,8 +34,7 @@ public class WeatherService {
     }
     
     public List getWeather(double latitude, double longitude){
-        List predictions = this.getExternalPredictions(latitude, longitude, -1);
-        return predictions;
+        return this.getExternalPredictions(latitude, longitude, -1);
     }
     
     public MyCache getCache(){
@@ -43,14 +42,12 @@ public class WeatherService {
     }
 
     public List getWeatherLimited(Double latitude, Double longitude, Integer numberPred) {
-        List predictions = this.getExternalPredictions(latitude, longitude, numberPred);
-        return predictions;
+        return this.getExternalPredictions(latitude, longitude, numberPred);
     }
 
     public Map getCurrentWeather(Double latitude, Double longitude) {
         List predictions = this.getExternalPredictions(latitude, longitude, -1);
-        Map current = (Map)predictions.get(0);
-        return current;
+        return (Map)predictions.get(0);
     }
 
     public Map getCacheMetrics() {

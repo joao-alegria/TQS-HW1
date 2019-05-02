@@ -3,16 +3,16 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package tqs.hw1.HW1.api;
+package tqs.hw1.api;
 
-import tqs.hw1.HW1.services.WeatherService;
 import java.util.List;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
-import static org.springframework.web.bind.annotation.RequestMethod.GET;
 import org.springframework.web.bind.annotation.RestController;
+import tqs.hw1.services.WeatherService;
 
 
 /**
@@ -26,27 +26,27 @@ public class REST {
     @Autowired
     WeatherService ws;
     
-    @RequestMapping(value="/weather/{latitude},{longitude}", method=GET)
+    @GetMapping(value="/weather/{latitude},{longitude}")
     public List weather(@PathVariable("latitude") Double latitude, @PathVariable("longitude") Double longitude) {
         return ws.getWeather(latitude, longitude);
     }
     
-    @RequestMapping(value="/weather/{latitude},{longitude}/now", method=GET)
+    @GetMapping(value="/weather/{latitude},{longitude}/now")
     public Map currentWeather(@PathVariable("latitude") Double latitude, @PathVariable("longitude") Double longitude) {
         return ws.getCurrentWeather(latitude, longitude);
     }
     
-    @RequestMapping(value="/weather/{latitude},{longitude}/{numberPred}", method=GET)
+    @GetMapping(value="/weather/{latitude},{longitude}/{numberPred}")
     public List weatherLimited(@PathVariable("latitude") Double latitude, @PathVariable("longitude") Double longitude, @PathVariable("numberPred") Integer numberPred) {
         return ws.getWeatherLimited(latitude, longitude, numberPred);
     }
     
-    @RequestMapping(value="/teste", method=GET)
+    @GetMapping(value="/teste")
     public String teste() {
         return ws.getCache().toString();
     }
     
-    @RequestMapping(value="/cacheStatus", method=GET)
+    @GetMapping(value="/cacheStatus")
     public Map cacheStatus() {
         return ws.getCacheMetrics();
     }

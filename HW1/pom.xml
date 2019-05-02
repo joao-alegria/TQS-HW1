@@ -106,9 +106,6 @@
                         </goals>
                     </execution>
                 </executions>
-                <!--            <configuration>
-                    <destFile>${sonar.jacoco.reportPath}</destFile>
-                </configuration>-->
             </plugin>
         </plugins>
     </build>
