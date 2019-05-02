@@ -13,9 +13,13 @@ import java.util.Map;
 public class MyCache<T, K> {
     
     private Map<T, CacheObject> cache = new HashMap();
-    private double defaultTTL, defaultUpdateTime;
-    private int requests = 0, hits = 0, misses = 0;
+    private double defaultTtl;
+    private double defaultUpdateTime;
+    private int requests = 0;
+    private int hits = 0;
+    private int misses = 0;
     private Thread t;
+    private boolean running=true;
 
     protected class CacheObject {
         private K value;
@@ -24,16 +28,7 @@ public class MyCache<T, K> {
         public CacheObject(K value) {
             this.value = value;
             this.lastAccessed = System.currentTimeMillis();
-        }
-
-        public K getValue() {
-            return value;
-        }
-
-        public long getLastAccessed() {
-            return lastAccessed;
-        }
-        
+        } 
 
         @Override
         public String toString() {
@@ -43,10 +38,10 @@ public class MyCache<T, K> {
 
     public static class Builder<T,K> {
 
-        private double TTL, updateTime = 5.0 * 60.0 * 1000.0;
+        private double ttl, updateTime = 5.0 * 60.0 * 1000.0;
 
-        public Builder TTL(double TTL) {
-            this.TTL = TTL;
+        public Builder ttl(double ttl) {
+            this.ttl = ttl;
             return this;
         }
 
@@ -57,7 +52,7 @@ public class MyCache<T, K> {
 
         public MyCache build() {
             MyCache<T,K> mc = new MyCache();
-            mc.defaultTTL = this.TTL;
+            mc.defaultTtl = this.ttl;
             mc.defaultUpdateTime = this.updateTime;
             return mc;
         }
@@ -65,22 +60,23 @@ public class MyCache<T, K> {
     }
 
     private MyCache() {
-        t = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    while (true) {
-                        Thread.sleep((long) defaultUpdateTime);
-                        cleanCache();
-                    }
-                } catch (InterruptedException ex) {
-                    Thread.currentThread().interrupt();
-                    relaunchThread();
+        t = new Thread(() -> {
+            try {
+                while (this.running) {
+                    Thread.sleep((long) defaultUpdateTime);
+                    cleanCache();
                 }
+            } catch (InterruptedException ex) {
+                Thread.currentThread().interrupt();
+                relaunchThread();
             }
         });
         t.setDaemon(true);
         t.start();
+    }
+    
+    private void stopThread(){
+        this.running=false;
     }
     
     private void relaunchThread(){
@@ -88,17 +84,17 @@ public class MyCache<T, K> {
         t.start();
     }
 
-    public Object getLimited(T key, int numberOfPred) throws Exception {
+    public Object getLimited(T key, int numberOfPred) throws CacheException {
         this.requests+=1;
         if(this.cache.containsKey(key)){
             long now = System.currentTimeMillis();
             CacheObject value = this.cache.get(key);
-            if (value == null || (now > (defaultTTL + value.lastAccessed))){
+            if (value == null || (now > (defaultTtl + value.lastAccessed))){
                 this.misses+=1;
-                throw new Exception("The value of the key "+key.toString()+" already expired.");
+                throw new CacheException("The value of the key "+key.toString()+" already expired.");
             }
             this.hits+=1;
-            K predictions=(K)value.value;
+            K predictions=value.value;
             if(predictions instanceof Iterable){
                 List output = new ArrayList();
                 Iterator it = ((Iterable)predictions).iterator();
@@ -113,25 +109,25 @@ public class MyCache<T, K> {
             return predictions;
         }else{
             this.misses+=1;
-            throw new Exception("The key "+key.toString()+" doesn't exist or expired..");
+            throw new CacheException("The key "+key.toString()+" doesn't exist or expired..");
         }
     }
 
-    public K get(T key) throws Exception {
+    public K get(T key) throws CacheException {
         this.requests+=1;
         if(this.cache.containsKey(key)){
             long now = System.currentTimeMillis();
             CacheObject value = this.cache.get(key);
-            if (value == null || (now > (defaultTTL + value.lastAccessed))){
+            if (value == null || (now > (defaultTtl + value.lastAccessed))){
                 this.misses+=1;
-                throw new Exception("The value of the key "+key.toString()+" already expired.");
+                throw new CacheException("The value of the key "+key.toString()+" already expired.");
             }
             this.hits+=1;
-            K predictions=(K)value.value;
+            K predictions=value.value;
             return predictions;
         }else{
             this.misses+=1;
-            throw new Exception("The key "+key.toString()+" doesn't exist or expired.");
+            throw new CacheException("The key "+key.toString()+" doesn't exist or expired.");
         }
     }
 
@@ -140,11 +136,11 @@ public class MyCache<T, K> {
         
     }
 
-    public void clear(T key) throws Exception {
+    public void clear(T key) throws CacheException {
         if(this.cache.containsKey(key)){
             this.cache.remove(key);
         }else{
-            throw new Exception("The key "+key.toString()+" doesn't exist or expired..");
+            throw new CacheException("The key "+key.toString()+" doesn't exist or expired..");
         }
     }
 
@@ -166,11 +162,11 @@ public class MyCache<T, K> {
             T key = null;
             CacheObject c = null;
  
-            for(T k : cache.keySet()){
-                key = k;
-                c = (CacheObject) cache.get(k);
+            for(Map.Entry<T,CacheObject> entry : cache.entrySet()){
+                key = entry.getKey();
+                c = entry.getValue();
  
-                if(c != null && (now > (defaultTTL + c.lastAccessed))){
+                if(c != null && (now > (defaultTtl + c.lastAccessed))){
                     deleteKey.add(key);
                 }
             }
@@ -187,7 +183,7 @@ public class MyCache<T, K> {
 
     @Override
     public String toString() {
-        return "MyCache{" + "cache=" + cache.toString() + ", defaultTTL=" + defaultTTL + ", defaultUpdateTime=" + defaultUpdateTime + '}';
+        return "MyCache{" + "cache=" + cache.toString() + ", defaultTTL=" + defaultTtl + ", defaultUpdateTime=" + defaultUpdateTime + '}';
     }
     
     public Map getMetrics(){

@@ -30,7 +30,7 @@ public class WeatherService {
     public WeatherService(){
         Double ttl = 1 * 60.0 * 1000.0;
         Double update = 0.01 * 60.0 * 1000.0;
-        this.mc =new MyCache.Builder<List, List>().TTL(ttl).updateTime(update).build();
+        this.mc =new MyCache.Builder<List, List>().ttl(ttl).updateTime(update).build();
     }
     
     public List getWeather(double latitude, double longitude){

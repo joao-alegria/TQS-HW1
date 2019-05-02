@@ -5,7 +5,6 @@
  */
 package tqs.hw1.HW1.persistence;
 
-import tqs.hw1.HW1.persistence.MyCache;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -31,7 +30,7 @@ public class MyCacheTest {
     public void testNoKey() throws Exception {
         System.out.println("noKey");
         String key="key";
-        MyCache instance =new MyCache.Builder<String, String>().TTL(0.5*60*1000).updateTime(0.5*60*1000).build();
+        MyCache instance =new MyCache.Builder<String, String>().ttl(0.5*60*1000).updateTime(0.5*60*1000).build();
         assertThrows(Exception.class, () -> {instance.get(key);});
         assertThrows(Exception.class, () -> {instance.getLimited(key,2);});
         assertThrows(Exception.class, () -> {instance.clear(key);});
@@ -46,7 +45,7 @@ public class MyCacheTest {
         Object key = "key";
         Object data = "value";
         int numberPred = 0;
-        MyCache instance =new MyCache.Builder<String, String>().TTL(0.5*60*1000).updateTime(0.5*60*1000).build();
+        MyCache instance =new MyCache.Builder<String, String>().ttl(0.5*60*1000).updateTime(0.5*60*1000).build();
         assertEquals(false, instance.containsKey(key));
         instance.put(key, data);
         assertEquals(true, instance.containsKey(key));
@@ -61,7 +60,7 @@ public class MyCacheTest {
         System.out.println("getLimited with list value");
         Object key = "key";
         Object data = new ArrayList(Arrays.asList("t1", "t2", "t3"));
-        MyCache instance =new MyCache.Builder<String, List>().TTL(0.5*60*1000).updateTime(0.5*60*1000).build();
+        MyCache instance =new MyCache.Builder<String, List>().ttl(0.5*60*1000).updateTime(0.5*60*1000).build();
         assertEquals(false, instance.containsKey(key));
         instance.put(key, data);
         assertEquals(true, instance.containsKey(key));
@@ -80,7 +79,7 @@ public class MyCacheTest {
         System.out.println("get");
         Object key = "key";
         Object data = "value";
-        MyCache instance =new MyCache.Builder<String, String>().TTL(0.5*60*1000).updateTime(0.5*60*1000).build();
+        MyCache instance =new MyCache.Builder<String, String>().ttl(0.5*60*1000).updateTime(0.5*60*1000).build();
         assertEquals(false, instance.containsKey(key));
         instance.put(key, data);
         assertEquals(true, instance.containsKey(key));
@@ -95,7 +94,7 @@ public class MyCacheTest {
         System.out.println("put");
         Object key = "key";
         Object data = "value";
-        MyCache instance =new MyCache.Builder<String, String>().TTL(0.5*60*1000).updateTime(0.5*60*1000).build();
+        MyCache instance =new MyCache.Builder<String, String>().ttl(0.5*60*1000).updateTime(0.5*60*1000).build();
         assertEquals(0, instance.size());
         assertEquals(false, instance.containsKey(key));
         instance.put(key, data);
@@ -111,7 +110,7 @@ public class MyCacheTest {
     public void testClear() throws Exception{
         System.out.println("clear");
         Object key = null;
-        MyCache instance =new MyCache.Builder<String, String>().TTL(0.5*60*1000).updateTime(0.5*60*1000).build();
+        MyCache instance =new MyCache.Builder<String, String>().ttl(0.5*60*1000).updateTime(0.5*60*1000).build();
         assertEquals(0, instance.size());
         instance.put(key, "value");
         assertEquals(1, instance.size());
@@ -126,7 +125,7 @@ public class MyCacheTest {
     public void testContainsKey() {
         System.out.println("containsKey");
         Object key = "key";
-        MyCache instance =new MyCache.Builder<String, String>().TTL(0.5*60*1000).updateTime(0.5*60*1000).build();
+        MyCache instance =new MyCache.Builder<String, String>().ttl(0.5*60*1000).updateTime(0.5*60*1000).build();
         boolean expResult = false;
         boolean result = instance.containsKey(key);
         assertEquals(expResult, result);
@@ -142,7 +141,7 @@ public class MyCacheTest {
     @Test
     public void testGetMetrics() {
         System.out.println("getMetrics");
-        MyCache instance =new MyCache.Builder<String, String>().TTL(0.5*60*1000).updateTime(0.5*60*1000).build();
+        MyCache instance =new MyCache.Builder<String, String>().ttl(0.5*60*1000).updateTime(0.5*60*1000).build();
         Map result = instance.getMetrics();
         assertEquals(true, result.containsKey("misses"));
         assertEquals(true, result.containsKey("hits"));
@@ -155,7 +154,7 @@ public class MyCacheTest {
     @Test
     public void testTimeOut() throws InterruptedException {
         System.out.println("timeOut");
-        MyCache instance =new MyCache.Builder<String, String>().TTL(0.1*60*1000).updateTime(0.01*60*1000).build();
+        MyCache instance =new MyCache.Builder<String, String>().ttl(0.1*60*1000).updateTime(0.01*60*1000).build();
         String key="key";
         String data="value";
         instance.put(key, data);
@@ -172,7 +171,7 @@ public class MyCacheTest {
     @Test
     public void testHitsMisses() throws Exception {
         System.out.println("hitsMisses");
-        MyCache instance =new MyCache.Builder<String, String>().TTL(0.1*60*1000).updateTime(0.01*60*1000).build();
+        MyCache instance =new MyCache.Builder<String, String>().ttl(0.1*60*1000).updateTime(0.01*60*1000).build();
         String key="key";
         String data="value";
         instance.put(key, data);

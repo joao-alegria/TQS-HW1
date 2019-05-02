@@ -64,6 +64,22 @@
             <scope>test</scope>
             <type>jar</type>
         </dependency>
+        
+        <!-- selenium -->
+        <dependency>
+            <groupId>org.seleniumhq.selenium</groupId>
+            <artifactId>selenium-java</artifactId>
+            <version>3.141.59</version>
+        </dependency>
+        
+        <!-- selenium / junit integration -->
+        <dependency>
+            <groupId>io.github.bonigarcia</groupId>
+            <artifactId>selenium-jupiter</artifactId>
+            <version>3.1.1</version>
+            <scope>test</scope>
+        </dependency>
+        
     </dependencies>
 
     <build>
