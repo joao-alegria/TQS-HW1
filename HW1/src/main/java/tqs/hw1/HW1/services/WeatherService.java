@@ -28,24 +28,13 @@ public class WeatherService {
     private DarkSkyService dss;
     
     public WeatherService(){
-        this.mc =new MyCache.Builder<List, List>().TTL(0.15*60*1000).updateTime(0.15*60*1000).build();
+        Double ttl = 1 * 60.0 * 1000.0;
+        Double update = 0.01 * 60.0 * 1000.0;
+        this.mc =new MyCache.Builder<List, List>().TTL(ttl).updateTime(update).build();
     }
     
     public List getWeather(double latitude, double longitude){
-        List key = new ArrayList(Arrays.asList(latitude, longitude));
-        List predictions;
-        if(this.mc.containsKey(key)){
-            try {
-                predictions = (List)this.mc.get(key);
-            } catch (Exception ex) {
-                Logger.getLogger(WeatherService.class.getName()).log(Level.SEVERE, null, ex);
-                predictions = dss.getPredictions(latitude, longitude);
-                this.mc.put(key, predictions);
-            }
-        }else{
-            predictions = dss.getPredictions(latitude, longitude);
-            this.mc.put(key, predictions);
-        }
+        List predictions = this.getExternalPredictions(latitude, longitude, -1);
         return predictions;
     }
     
@@ -54,38 +43,12 @@ public class WeatherService {
     }
 
     public List getWeatherLimited(Double latitude, Double longitude, Integer numberPred) {
-        List key = new ArrayList(Arrays.asList(latitude, longitude));
-        List predictions;
-        if(this.mc.containsKey(key)){
-            try {
-                predictions = (List)this.mc.getLimited(key, numberPred);
-            } catch (Exception ex) {
-                Logger.getLogger(WeatherService.class.getName()).log(Level.SEVERE, null, ex);
-                predictions = dss.getPredictions(latitude, longitude).subList(0, numberPred);
-                this.mc.put(key, predictions);
-            }
-        }else{
-            predictions = dss.getPredictions(latitude, longitude).subList(0, numberPred);;
-            this.mc.put(key, predictions);
-        }
+        List predictions = this.getExternalPredictions(latitude, longitude, numberPred);
         return predictions;
     }
 
     public Map getCurrentWeather(Double latitude, Double longitude) {
-        List key = new ArrayList(Arrays.asList(latitude, longitude));
-        List predictions;
-        if(this.mc.containsKey(key)){
-            try {
-                predictions = (List)this.mc.get(key);
-            } catch (Exception ex) {
-                Logger.getLogger(WeatherService.class.getName()).log(Level.SEVERE, null, ex);
-                predictions = dss.getPredictions(latitude, longitude);
-                this.mc.put(key, predictions);
-            }
-        }else{
-            predictions = dss.getPredictions(latitude, longitude);
-            this.mc.put(key, predictions);
-        }
+        List predictions = this.getExternalPredictions(latitude, longitude, -1);
         Map current = (Map)predictions.get(0);
         return current;
     }
@@ -94,4 +57,34 @@ public class WeatherService {
         return this.mc.getMetrics();
     }
     
+    private List getExternalPredictions(Double latitude, Double longitude, int number){
+        List key = new ArrayList(Arrays.asList(latitude, longitude));
+        List predictions;
+        if(this.mc.containsKey(key)){
+            try {
+                if(number==-1){
+                    predictions = (List)this.mc.get(key);
+                }else{
+                    predictions = (List)this.mc.getLimited(key, number);
+                }
+            } catch (Exception ex) {
+                Logger.getLogger(WeatherService.class.getName()).log(Level.SEVERE, null, ex);
+                if(number==-1){
+                    predictions = dss.getPredictions(latitude, longitude);
+                }else{
+                    predictions = dss.getPredictions(latitude, longitude).subList(0, number);
+                }
+                this.mc.put(key, predictions);
+            }
+        }else{
+            if(number==-1){
+                predictions = dss.getPredictions(latitude, longitude);
+            }else{
+                predictions = dss.getPredictions(latitude, longitude).subList(0, number);
+            }
+            this.mc.put(key, predictions);
+        }
+        return predictions;
+    }
+
 }

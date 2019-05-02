@@ -15,15 +15,25 @@ public class MyCache<T, K> {
     private Map<T, CacheObject> cache = new HashMap();
     private double defaultTTL, defaultUpdateTime;
     private int requests = 0, hits = 0, misses = 0;
+    private Thread t;
 
     protected class CacheObject {
-        public K value;
-        public long lastAccessed;
+        private K value;
+        private long lastAccessed;
 
         public CacheObject(K value) {
             this.value = value;
             this.lastAccessed = System.currentTimeMillis();
         }
+
+        public K getValue() {
+            return value;
+        }
+
+        public long getLastAccessed() {
+            return lastAccessed;
+        }
+        
 
         @Override
         public String toString() {
@@ -33,7 +43,7 @@ public class MyCache<T, K> {
 
     public static class Builder<T,K> {
 
-        private double TTL, updateTime = 5 * 60 * 1000;
+        private double TTL, updateTime = 5.0 * 60.0 * 1000.0;
 
         public Builder TTL(double TTL) {
             this.TTL = TTL;
@@ -55,18 +65,25 @@ public class MyCache<T, K> {
     }
 
     private MyCache() {
-        Thread t = new Thread(new Runnable() {
+        t = new Thread(new Runnable() {
             @Override
             public void run() {
-                while (true) {
-                    try {
+                try {
+                    while (true) {
                         Thread.sleep((long) defaultUpdateTime);
-                    } catch (InterruptedException ex) {
+                        cleanCache();
                     }
-                    cleanCache();
+                } catch (InterruptedException ex) {
+                    Thread.currentThread().interrupt();
+                    relaunchThread();
                 }
             }
         });
+        t.setDaemon(true);
+        t.start();
+    }
+    
+    private void relaunchThread(){
         t.setDaemon(true);
         t.start();
     }
