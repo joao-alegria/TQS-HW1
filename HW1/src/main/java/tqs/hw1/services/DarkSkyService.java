@@ -21,12 +21,12 @@ import org.springframework.stereotype.Service;
 public class DarkSkyService {
     
     private final Client client = ClientBuilder.newClient();
-    private final static String url = "https://api.darksky.net/forecast/";
-    private final static String token = "62941f23eb66f081a83f3c443e509bf3";
+    private static final String URL = "https://api.darksky.net/forecast/";
+    private static final String TOKEN = "62941f23eb66f081a83f3c443e509bf3";
     
     public List getPredictions(Double latitude, Double longitude){
         JSONObject data = client
-                            .target(url+token+"/"+latitude+","+longitude)
+                            .target(URL+TOKEN+"/"+latitude+","+longitude)
                             .request(MediaType.APPLICATION_JSON)
                             .get(JSONObject.class);
         List dayPred = (List)((Map)data.get("daily")).get("data");
