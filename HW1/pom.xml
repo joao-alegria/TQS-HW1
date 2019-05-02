@@ -9,12 +9,13 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>tqs.hw1</groupId>
-    <artifactId>HW1</artifactId>
+    <artifactId>Hw1Application</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>HW1</name>
     <description>Demo project for Spring Boot</description>
 
     <properties>
+        <start-class>tqs.hw1.Hw1Application</start-class>
         <java.version>1.8</java.version>
         <!-- Sonar -->
         <sonar.core.codeCoveragePlugin>jacoco</sonar.core.codeCoveragePlugin>

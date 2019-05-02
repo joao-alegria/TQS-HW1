@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -74,6 +76,17 @@ public class MyCache<T, K> {
         });
         t.setDaemon(true);
         t.start();
+    }
+    
+    public void stop(){
+        this.running=false;
+        try {
+            for(T key : this.cache.keySet()){
+                this.clear(key);
+            }
+        } catch (CacheException ex) {
+            Logger.getLogger(MyCache.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
     
     private void relaunchThread(){

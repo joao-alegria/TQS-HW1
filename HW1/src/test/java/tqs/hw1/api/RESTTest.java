@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package tqs.hw1.HW1.api;
+package tqs.hw1.api;
 
 import tqs.hw1.api.REST;
 import java.util.ArrayList;

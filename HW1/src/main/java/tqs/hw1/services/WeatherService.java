@@ -27,6 +27,11 @@ public class WeatherService {
     @Autowired
     private DarkSkyService dss;
     
+    public void resetCache(double ttl, double update){
+        this.mc.stop();
+        this.mc =new MyCache.Builder<List, List>().ttl(ttl).updateTime(update).build();
+    }
+    
     public WeatherService(){
         Double ttl = 1 * 60.0 * 1000.0;
         Double update = 0.01 * 60.0 * 1000.0;
