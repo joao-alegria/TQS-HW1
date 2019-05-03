@@ -8,6 +8,7 @@ package tqs.hw1.api;
 import java.util.List;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -32,6 +33,7 @@ public class REST {
     }
     
     @GetMapping(value="/weather/{latitude},{longitude}/now")
+    @CrossOrigin
     public Map currentWeather(@PathVariable("latitude") Double latitude, @PathVariable("longitude") Double longitude) {
         return ws.getCurrentWeather(latitude, longitude);
     }

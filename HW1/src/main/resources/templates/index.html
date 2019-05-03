@@ -94,7 +94,7 @@
                                 <label>Longitude:</label>
                                 <input style="text-align: center;" type="text" class="form-control" id="longitude" placeholder="-8">
                             </div>
-                            <input style="font-size: 18px;" class="btn btn-primary" type="button" value="Submit"onClick="getInfo(document.getElementById('latitude').value, document.getElementById('longitude').value)">
+                            <input style="font-size: 18px;" class="btn btn-primary" type="button" value="Submit"onClick="getInfo(parseFloat(document.getElementById('latitude').value), parseFloat(document.getElementById('longitude').value))">
                         </form>
                     </center>
                 </div>
@@ -109,9 +109,11 @@
                 <table class="table" border="1">
                     <thead class="thead-dark">
                         <tr>
+                            <th scope="col">Day</th>
                             <th scope="col">Humidity</th>
                             <th scope="col">Ozone</th>
                             <th scope="col">Percip. Prob.</th>
+                            <th scope="col">Percip. Type</th>
                             <th scope="col">Pressure</th>
                             <th scope="col">Visibility</th>
                             <th scope="col">Wind Speed</th>
@@ -191,14 +193,14 @@
                                 var endOfRequest;
                                 if (document.getElementById("currentTime").checked) {
                                     endOfRequest = "/now";
-                                    infoTitle.innerText = "Current Weather"
+                                    infoTitle.innerText = "Current Weather for latitude="+latitude.toFixed(2)+" and longitude="+longitude.toFixed(2);
                                 } else {
                                     if (document.getElementById("numDays").value !== "") {
                                         endOfRequest = "/" + document.getElementById("numDays").value;
-                                        infoTitle.innerText = "Predictions for " + document.getElementById("numDays").value + " days"
+                                        infoTitle.innerText = "Predictions for " + document.getElementById("numDays").value + " days for latitude="+latitude.toFixed(2)+" and longitude="+longitude.toFixed(2);
                                     } else {
                                         endOfRequest = "";
-                                        infoTitle.innerText = "Predictions for the entire week"
+                                        infoTitle.innerText = "Predictions for the entire week for latitude="+latitude.toFixed(2)+" and longitude="+longitude.toFixed(2);
                                     }
                                 }
 
@@ -207,6 +209,7 @@
                                 $.ajax({
                                     async: false,
                                     type: 'GET',
+                                    crossDomain: false,
                                     url: 'http://localhost:8080/api/weather/' + latitude + "," + longitude + endOfRequest,
                                     success: function (data) {
                                         requestData = data;
@@ -235,12 +238,18 @@
                                     var cell4 = row.insertCell(3);
                                     var cell5 = row.insertCell(4);
                                     var cell6 = row.insertCell(5);
-                                    cell1.innerHTML = requestData["humidity"];
-                                    cell2.innerHTML = requestData["ozone"];
-                                    cell3.innerHTML = requestData["precipProbability"];
-                                    cell4.innerHTML = requestData["pressure"];
-                                    cell5.innerHTML = requestData["visibility"];
-                                    cell6.innerHTML = requestData["windSpeed"];
+                                    var cell7 = row.insertCell(6);
+                                    var cell8 = row.insertCell(7);
+                                    var date = new Date(requestData["time"]*1000);
+                                    
+                                    cell1.innerHTML = date.getDate() + "/" + (date.getMonth() + 1) + "/" + date.getFullYear();
+                                    cell2.innerHTML = requestData["humidity"];
+                                    cell3.innerHTML = requestData["ozone"];
+                                    cell4.innerHTML = requestData["precipProbability"];
+                                    cell5.innerHTML = requestData["precipType"];
+                                    cell6.innerHTML = requestData["pressure"];
+                                    cell7.innerHTML = requestData["visibility"];
+                                    cell8.innerHTML = requestData["windSpeed"];
                                 } else {
                                     for (var item in requestData) {
                                         row = table.insertRow(index);
@@ -250,12 +259,18 @@
                                         cell4 = row.insertCell(3);
                                         cell5 = row.insertCell(4);
                                         cell6 = row.insertCell(5);
-                                        cell1.innerHTML = requestData[item]["humidity"];
-                                        cell2.innerHTML = requestData[item]["ozone"];
-                                        cell3.innerHTML = requestData[item]["precipProbability"];
-                                        cell4.innerHTML = requestData[item]["pressure"];
-                                        cell5.innerHTML = requestData[item]["visibility"];
-                                        cell6.innerHTML = requestData[item]["windSpeed"];
+                                        cell7 = row.insertCell(6);
+                                        cell8 = row.insertCell(7);
+                                        var date = new Date(requestData[item]["time"]*1000);
+                                    
+                                        cell1.innerHTML = date.getDate() + "/" + (date.getMonth() + 1) + "/" + date.getFullYear();
+                                        cell2.innerHTML = requestData[item]["humidity"];
+                                        cell3.innerHTML = requestData[item]["ozone"];
+                                        cell4.innerHTML = requestData[item]["precipProbability"];
+                                        cell5.innerHTML = requestData[item]["precipType"];
+                                        cell6.innerHTML = requestData[item]["pressure"];
+                                        cell7.innerHTML = requestData[item]["visibility"];
+                                        cell8.innerHTML = requestData[item]["windSpeed"];
 
                                         index += 1;
                                     }

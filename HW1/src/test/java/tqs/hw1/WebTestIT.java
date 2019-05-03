@@ -9,29 +9,21 @@ import io.github.bonigarcia.seljup.SeleniumExtension;
 import io.github.bonigarcia.wdm.WebDriverManager;
 import org.junit.jupiter.api.AfterEach;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.openqa.selenium.By;
+import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
-import org.springframework.boot.web.server.LocalServerPort;
-import org.springframework.web.context.WebApplicationContext;
-
 
 @ExtendWith(SeleniumExtension.class)
-@SpringBootTest(webEnvironment=WebEnvironment.RANDOM_PORT)
+@SpringBootTest(webEnvironment = WebEnvironment.DEFINED_PORT)
 public class WebTestIT {
 
-    @Autowired
-    WebApplicationContext context;
-
-    @LocalServerPort
-    int port;
-    
     WebDriver driver;
 
     @BeforeEach
@@ -39,28 +31,55 @@ public class WebTestIT {
         WebDriverManager.firefoxdriver().setup();
         driver = new FirefoxDriver();
     }
-    
+
     @Test
-    public void testTQSHW1() throws Exception {
-        System.out.println("aqui");
-        driver.get("http://localhost:"+port+"/");
+    public void testT1() throws Exception {
+        driver.get("http://localhost:8080/");
         driver.findElement(By.id("latitude")).click();
         driver.findElement(By.id("latitude")).clear();
         driver.findElement(By.id("latitude")).sendKeys("40");
         driver.findElement(By.id("longitude")).click();
         driver.findElement(By.id("longitude")).clear();
         driver.findElement(By.id("longitude")).sendKeys("-8");
-        driver.findElement(By.id("myTabContent")).click();
         driver.findElement(By.xpath("(.//*[normalize-space(text()) and normalize-space(.)='Longitude:'])[1]/following::input[2]")).click();
-        driver.findElement(By.id("showInfo")).click();
-        assertEquals("Current Weather", driver.findElement(By.id("infoTitle")).getText());
+        assertEquals("Current Weather for latitude=40.00 and longitude=-8.00", driver.findElement(By.id("infoTitle")).getText());
+        assertTrue(driver.findElement(By.xpath("(.//*[normalize-space(text()) and normalize-space(.)='Wind Speed'])[1]/following::td[1]")).isDisplayed());
     }
 
-    
+    @Test
+    public void testT2() throws Exception {
+        driver.get("http://localhost:8080/");
+        driver.findElement(By.id("multipleDaysTime")).click();
+        driver.findElement(By.id("numDays")).click();
+        driver.findElement(By.id("numDays")).clear();
+        driver.findElement(By.id("numDays")).sendKeys("3");
+        driver.findElement(By.id("numDays")).sendKeys(Keys.ENTER);
+        driver.findElement(By.id("map-tab")).click();
+        driver.findElement(By.xpath("(.//*[normalize-space(text()) and normalize-space(.)='Longitude:'])[1]/following::canvas[1]")).click();
+        assertEquals("Predictions for 3 days for latitude=43.91 and longitude=-8.08", driver.findElement(By.id("infoTitle")).getText());
+        assertTrue(driver.findElement(By.xpath("(.//*[normalize-space(text()) and normalize-space(.)='undefined'])[2]/following::td[4]")).isDisplayed());
+    }
+
+    @Test
+    public void testT3() throws Exception {
+        driver.get("http://localhost:8080/");
+        driver.findElement(By.id("multipleDaysTime")).click();
+        driver.findElement(By.id("latitude")).click();
+        driver.findElement(By.id("latitude")).clear();
+        driver.findElement(By.id("latitude")).sendKeys("5");
+        driver.findElement(By.id("longitude")).click();
+        driver.findElement(By.id("longitude")).clear();
+        driver.findElement(By.id("longitude")).sendKeys("5");
+        driver.findElement(By.xpath("(.//*[normalize-space(text()) and normalize-space(.)='Longitude:'])[1]/following::input[2]")).click();
+        assertEquals("Predictions for the entire week for latitude=5.00 and longitude=5.00", driver.findElement(By.id("infoTitle")).getText());
+        assertTrue(driver.findElement(By.xpath("(.//*[normalize-space(text()) and normalize-space(.)='rain'])[7]/following::td[4]")).isDisplayed());
+    }
+
     @AfterEach
     public void destroy() {
         if (driver != null) {
             driver.close();
         }
     }
+
 }
