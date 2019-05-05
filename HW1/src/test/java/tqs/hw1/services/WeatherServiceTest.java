@@ -148,7 +148,7 @@ public class WeatherServiceTest {
         assertEquals(1, weatherService.getCacheMetrics().get("requests"));
         assertEquals(1, weatherService.getCacheMetrics().get("hits"));
         assertEquals(0, weatherService.getCacheMetrics().get("misses"));
-        TimeUnit.SECONDS.sleep(5);
+        TimeUnit.SECONDS.sleep(6);
         weatherService.getWeather(latitude, longitude);
         assertEquals(2, weatherService.getCacheMetrics().get("requests"));
         assertEquals(1, weatherService.getCacheMetrics().get("hits"));
