@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package tqs.hw1.services;
 
 import java.util.List;
@@ -14,8 +9,8 @@ import org.json.simple.JSONObject;
 import org.springframework.stereotype.Service;
 
 /**
- *
- * @author joaoalegria
+ * Service used as a representation of the external api used to obtains all the predictions information.
+ * Uses the SpringBoot component Service to help in its creation.
  */
 @Service
 public class DarkSkyService {
@@ -24,6 +19,13 @@ public class DarkSkyService {
     private static final String URL = "https://api.darksky.net/forecast/";
     private static final String TOKEN = "62941f23eb66f081a83f3c443e509bf3";
     
+    /**
+     * Makes a request to the external api and processes it to obtain only the prediction of the
+     * upcoming week.
+     * @param latitude the latitude of the location to be processed.
+     * @param longitude the longitude of the location to be processed.
+     * @return a list with all the predictions.
+     */
     public List getPredictions(Double latitude, Double longitude){
         JSONObject data = client
                             .target(URL+TOKEN+"/"+latitude+","+longitude)

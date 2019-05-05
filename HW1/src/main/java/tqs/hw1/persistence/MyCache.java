@@ -9,8 +9,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- *
- * @author joaoalegria
+ * Map like data structure that provides temporary storage.
  */
 public class MyCache<T, K> {
     
@@ -22,7 +21,14 @@ public class MyCache<T, K> {
     private int misses = 0;
     private Thread t;
     private boolean running=true;
+    private String errorMessage1="The value of the key %s already expired.";
+    private String errorMessage2="The key %s doesn't exist or expired.";
 
+    
+    /**
+     * Cache object wrapper used to add additional information to the object inserted.
+     * In this case the time it was inserted.
+     */
     protected class CacheObject {
         private K value;
         private long lastAccessed;
@@ -38,21 +44,40 @@ public class MyCache<T, K> {
         }    
     }
 
+    /**
+     * Auxiliary class, used for creating a builder to the cache.
+     * @param <T> the object type of the key
+     * @param <K> the object type of the value
+     */
     public static class Builder<T,K> {
 
         private double ttl = 5.0 * 60.0 * 1000.0;
         private double updateTime = 5.0 * 60.0 * 1000.0;
 
+        /**
+         * Time to leave setter.
+         * @param ttl double that indicates the time to leave of the values in milliseconds.
+         * @return the Builder Object itself
+         */
         public Builder ttl(double ttl) {
             this.ttl = ttl;
             return this;
         }
 
+        /**
+         * Update time of the worker thread setter.
+         * @param updateTime double that indicates the time interval the values should be checked in milliseconds.
+         * @return the Builder Object itself
+         */
         public Builder updateTime(double updateTime) {
             this.updateTime = updateTime;
             return this;
         }
 
+        /**
+         * Finalizes the building phase, inherit to the builder pattern.
+         * @return the cache already built
+         */
         public MyCache build() {
             MyCache<T,K> mc = new MyCache();
             mc.defaultTtl = this.ttl;
@@ -62,6 +87,9 @@ public class MyCache<T, K> {
 
     }
 
+    /**
+     * Constructor of the cache object, private because the builder pattern is used.
+     */
     private MyCache() {
         t = new Thread(() -> {
             try {
@@ -78,6 +106,9 @@ public class MyCache<T, K> {
         t.start();
     }
     
+    /**
+     * Stops the worker thread of the cache and cleans every value that may exist.
+     */
     public void stop(){
         this.running=false;
         try {
@@ -89,11 +120,22 @@ public class MyCache<T, K> {
         }
     }
     
+    /**
+     * Private method used when a error occurs during the execution of the worker thread.
+     */
     private void relaunchThread(){
         t.setDaemon(true);
         t.start();
     }
 
+    /**
+     * If the value stored is of the type Iterable, the returned Object is a 
+     * object limited by the number indicated, else the whole value stored is returned.
+     * @param key the key of the value that should be returned, limited or not.
+     * @param numberOfPred the number of sub-objects the value should be limited, if Iterable
+     * @return the value stored or a limitation of that value
+     * @throws CacheException that indicates the error that occurred
+     */
     public Object getLimited(T key, int numberOfPred) throws CacheException {
         this.requests+=1;
         if(this.cache.containsKey(key)){
@@ -101,7 +143,7 @@ public class MyCache<T, K> {
             CacheObject value = this.cache.get(key);
             if (value == null || (now > (defaultTtl + value.lastAccessed))){
                 this.misses+=1;
-                throw new CacheException("The value of the key "+key.toString()+" already expired.");
+                throw new CacheException(String.format(errorMessage1, key.toString()));
             }
             this.hits+=1;
             K predictions=value.value;
@@ -119,10 +161,16 @@ public class MyCache<T, K> {
             return predictions;
         }else{
             this.misses+=1;
-            throw new CacheException("The key "+key.toString()+" doesn't exist or expired..");
+            throw new CacheException(String.format(errorMessage2, key.toString()));
         }
     }
 
+    /**
+     * Returns the value stored in a specific key as it was stored.
+     * @param key the key of the value that should be returned
+     * @return the value as it was stored in the cache
+     * @throws CacheException that indicates the error that occurred
+     */
     public K get(T key) throws CacheException {
         this.requests+=1;
         if(this.cache.containsKey(key)){
@@ -130,29 +178,44 @@ public class MyCache<T, K> {
             CacheObject value = this.cache.get(key);
             if (value == null || (now > (defaultTtl + value.lastAccessed))){
                 this.misses+=1;
-                throw new CacheException("The value of the key "+key.toString()+" already expired.");
+                throw new CacheException(String.format(errorMessage1, key.toString()));
             }
             this.hits+=1;
             return value.value;
         }else{
             this.misses+=1;
-            throw new CacheException("The key "+key.toString()+" doesn't exist or expired.");
+            throw new CacheException(String.format(errorMessage2, key.toString()));
         }
     }
 
+    /**
+     * Allows the insertion of a key - value pair in the cache.
+     * @param key the key object to be inserted.
+     * @param data the value object to be inserted.
+     */
     public void put(T key, K data) {
         this.cache.put(key, new CacheObject(data));
         
     }
 
+    /**
+     * Removes the key - value pair of the cache if the key existes.
+     * @param key the key object that should be removed.
+     * @throws CacheException that indicates the error that occurred
+     */
     public void clear(T key) throws CacheException {
         if(this.cache.containsKey(key)){
             this.cache.remove(key);
         }else{
-            throw new CacheException("The key "+key.toString()+" doesn't exist or expired..");
+            throw new CacheException(String.format(errorMessage2, key.toString()));
         }
     }
 
+    /**
+     * Checks if a key object exists in the cache.
+     * @param key the key object to be checked.
+     * @return a boolean that represents if the key exists or not.
+     */
     public boolean containsKey(T key) {
         for(T k : this.cache.keySet()) {
             if (k.equals(key)) {
@@ -162,6 +225,10 @@ public class MyCache<T, K> {
         return false;
     }
 
+    /**
+     * Private method used by the working thread to check which key - value pairs have already expired his time 
+     * to leave.
+     */
     private void cleanCache() {
         long now = System.currentTimeMillis();
         ArrayList<T> deleteKey = null;
@@ -190,11 +257,19 @@ public class MyCache<T, K> {
         }
     }
 
+    /**
+     * Creates a String representation of the object.
+     * @return the string created.
+     */
     @Override
     public String toString() {
         return "MyCache{" + "cache=" + cache.toString() + ", defaultTTL=" + defaultTtl + ", defaultUpdateTime=" + defaultUpdateTime + '}';
     }
     
+    /**
+     * Informs of the metrics of the cache, related to hits, misses and requests made to it.
+     * @return a map with "hits", "misses" and "requests" as the keys and the respective values.
+     */
     public Map getMetrics(){
         Map output =  new HashMap();
         output.put("hits", this.hits);
@@ -203,6 +278,10 @@ public class MyCache<T, K> {
         return output;
     }
     
+    /**
+     * Informs of the size of the cache.
+     * @return the number of key-value pairs stored.
+     */
     public int size(){
         return this.cache.size();
     }

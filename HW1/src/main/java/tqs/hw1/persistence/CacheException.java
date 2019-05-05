@@ -1,16 +1,14 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package tqs.hw1.persistence;
 
 /**
- *
- * @author joaoalegria
+ * Personal implementation of the Exception object.
  */
 public class CacheException extends Exception{
 
+    /**
+     * Simple creator.
+     * @param string the message the exception should contain.
+     */
     public CacheException(String string) {
         super(string);
     }
