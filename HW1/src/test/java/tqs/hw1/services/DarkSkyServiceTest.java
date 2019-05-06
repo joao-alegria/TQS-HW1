@@ -7,6 +7,7 @@ package tqs.hw1.services;
 
 import java.util.List;
 import java.util.Map;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.Test;
 
@@ -30,8 +31,15 @@ public class DarkSkyServiceTest {
         DarkSkyService instance = new DarkSkyService();
         List result = instance.getPredictions(latitude, longitude);
         Map obj =  (Map)result.get(0);
+        assertEquals(8, obj.size());
         assertTrue(obj.containsKey("time"));
         assertTrue(obj.containsKey("pressure"));
+        assertTrue(obj.containsKey("humidity"));
+        assertTrue(obj.containsKey("ozone"));
+        assertTrue(obj.containsKey("precipProbability"));
+        assertTrue(obj.containsKey("precipType"));
+        assertTrue(obj.containsKey("visibility"));
+        assertTrue(obj.containsKey("windSpeed"));
     }
     
 }

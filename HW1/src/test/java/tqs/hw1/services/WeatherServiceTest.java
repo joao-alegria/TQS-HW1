@@ -6,6 +6,7 @@
 package tqs.hw1.services;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -153,6 +154,32 @@ public class WeatherServiceTest {
         assertEquals(2, weatherService.getCacheMetrics().get("requests"));
         assertEquals(1, weatherService.getCacheMetrics().get("hits"));
         assertEquals(1, weatherService.getCacheMetrics().get("misses"));
+    }
+    
+    /**
+     * Test of asking predictions for more than 8 days.
+     */
+    @Test
+    public void testNumberOfDaysToHigh() {
+        System.out.println("tooMuchDays");
+        double latitude = 0.0;
+        double longitude = 0.0;
+        Integer numberPred = 10;
+        List result = weatherService.getWeatherLimited(latitude, longitude, numberPred);
+        assertEquals(Collections.EMPTY_LIST, result);
+    }
+    
+    /**
+     * Test of asking predictions with negative number of days.
+     */
+    @Test
+    public void testNumberOfDaysToLow() {
+        System.out.println("tooLowDays");
+        double latitude = 0.0;
+        double longitude = 0.0;
+        Integer numberPred = -1;
+        List result = weatherService.getWeatherLimited(latitude, longitude, numberPred);
+        assertEquals(Collections.EMPTY_LIST, result);
     }
     
 }

@@ -1,5 +1,8 @@
 package tqs.hw1.services;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.ws.rs.client.Client;
@@ -32,12 +35,30 @@ public class DarkSkyService {
                             .request(MediaType.APPLICATION_JSON)
                             .get(JSONObject.class);
         List dayPred = (List)((Map)data.get("daily")).get("data");
-        dayPred.sort((Object t, Object t1) -> {
+        
+        
+        String[] keys = new String[] {"time", "humidity", "ozone", "precipProbability", "precipType", "pressure","visibility","windSpeed"};
+        
+        
+        List output = new ArrayList();
+        for(Object pred : dayPred){
+            Map p = (Map)pred;
+            Map myPred = new HashMap();
+            for(Object key : p.keySet()){
+                String k = (String)key;
+                if(Arrays.asList(keys).contains(k)){
+                    myPred.put(k, p.get(key));
+                }
+            }
+            output.add(myPred);
+        }
+        
+        output.sort((Object t, Object t1) -> {
             Map m1 = (Map) t;
             Map m2 = (Map) t1;
             return ((int)m1.get("time"))-((int)m2.get("time"));            
         });
-        return dayPred;
+        return output;
     }
     
 }

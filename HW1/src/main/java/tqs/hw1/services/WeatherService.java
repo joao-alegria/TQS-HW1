@@ -2,6 +2,7 @@ package tqs.hw1.services;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
@@ -67,6 +68,9 @@ public class WeatherService {
      * @return a list of the different predictions.
      */
     public List getWeatherLimited(Double latitude, Double longitude, Integer numberPred) {
+        if(8<numberPred || numberPred<0){
+            return Collections.EMPTY_LIST;
+        }
         return this.getExternalPredictions(latitude, longitude, numberPred);
     }
 
