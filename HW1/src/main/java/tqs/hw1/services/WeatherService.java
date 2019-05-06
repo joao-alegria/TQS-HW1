@@ -69,7 +69,7 @@ public class WeatherService {
      */
     public List getWeatherLimited(Double latitude, Double longitude, Integer numberPred) {
         if(8<numberPred || numberPred<0){
-            return Collections.EMPTY_LIST;
+            return Collections.emptyList();
         }
         return this.getExternalPredictions(latitude, longitude, numberPred);
     }

@@ -44,10 +44,10 @@ public class DarkSkyService {
         for(Object pred : dayPred){
             Map p = (Map)pred;
             Map myPred = new HashMap();
-            for(Object key : p.keySet()){
-                String k = (String)key;
-                if(Arrays.asList(keys).contains(k)){
-                    myPred.put(k, p.get(key));
+            for(Object entry : p.entrySet()){
+                Map.Entry e = (Map.Entry)entry;
+                if(Arrays.asList(keys).contains(e.getKey())){
+                    myPred.put(e.getKey(), e.getValue());
                 }
             }
             output.add(myPred);
